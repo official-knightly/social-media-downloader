@@ -30,7 +30,7 @@ export async function grabMedia(data: { url: string; quality: string; mode: stri
       if (!rawUrl) return { ok: false, error: "Your hosted downloader didn't return a file or download link." };
       const url = new URL(rawUrl, DOWNLOAD_SERVICE);
       if (!["https:", "http:"].includes(url.protocol)) return { ok: false, error: "Your hosted downloader returned an invalid download link." };
-      return { ok: true, items: [{ url: url.href, filename: body.filename, type: data.mode === "audio" ? "audio" : "video" }] };
+      return { ok: true, items: [{ url: url.href, ...(body.filename ? { filename: body.filename } : {}), type: data.mode === "audio" ? "audio" : "video" }] };
     }
     const blob = await response.blob();
     if (!blob.size) return { ok: false, error: "Your hosted downloader returned an empty file." };
