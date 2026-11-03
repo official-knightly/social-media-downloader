@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Downloads use a same-origin streaming server route to the hosted media service, keeping optional credentials server-only and avoiding browser CORS restrictions.
+- The browser download adapter supports returned files and JSON download links, and releases temporary file URLs when results change.

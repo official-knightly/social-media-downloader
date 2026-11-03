@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { grabMedia, type GrabResult } from "@/lib/cobalt.functions";
+import { grabMedia, type GrabResult } from "@/lib/download";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,7 +45,6 @@ const ytThumb = (u: string) => {
 type Hist = { url: string; emoji: string; at: number };
 
 function Index() {
-  const grab = useServerFn(grabMedia);
   const [url, setUrl] = useState("");
   const [step, setStep] = useState<"paste" | "pick">("paste");
   const [loading, setLoading] = useState<string | null>(null);
@@ -55,6 +53,11 @@ function Index() {
   const [history, setHistory] = useState<Hist[]>([]);
 
   useEffect(() => setHistory(JSON.parse(localStorage.getItem("grab-history") || "[]")), []);
+  useEffect(() => () => {
+    if (result?.ok) result.items.forEach((item) => {
+      if (item.url.startsWith("blob:")) URL.revokeObjectURL(item.url);
+    });
+  }, [result]);
   const found = detect(url);
   const thumb = ytThumb(url);
 
@@ -70,11 +73,11 @@ function Index() {
 
   async function pick(o: (typeof OPTIONS)[number]) {
     setLoading(o.label); setError(""); setResult(null);
-    const r = await grab({ data: { url: url.trim(), quality: o.quality, mode: o.mode } });
+    const r = await grabMedia({ url: url.trim(), quality: o.quality, mode: o.mode });
     setLoading(null);
     if (!r.ok) return setError(r.error);
     setResult(r);
-    const h = [{ url: url.trim(), emoji: found!.emoji, at: Date.now() }, ...history.filter((x) => x.url !== url.trim())].slice(0, 8);
+    const h = [{ url: url.trim(), emoji: found?.emoji ?? "⬇️", at: Date.now() }, ...history.filter((x) => x.url !== url.trim())].slice(0, 8);
     setHistory(h); localStorage.setItem("grab-history", JSON.stringify(h));
   }
 
@@ -110,13 +113,15 @@ function Index() {
             DOWNLOAD 🚀
           </button>
         )}
-        {error && <p className="mt-3 font-bold text-primary animate-bounce-in">{error}</p>}
+         {error && <p role="alert" className="mt-3 font-bold text-primary animate-bounce-in">{error}</p>}
       </section>
 
       {step === "pick" && (
         <section className="brutal bg-accent rounded-lg p-5 mt-6 animate-bounce-in">
           {thumb && <img src={thumb} alt="Video preview" className="brutal rounded-lg w-full mb-4" />}
           <h2 className="font-display text-xl">Pick a resolution</h2>
+          <p className="mt-2 text-sm text-muted-foreground">Available quality depends on the post. Render may need a moment to wake up; large files take longer.</p>
+          {loading && <p role="status" className="mt-2 text-sm font-bold">Preparing your {loading} download…</p>}
           <div className="grid grid-cols-3 gap-2 mt-3">
             {OPTIONS.map((o, i) => (
               <button key={o.label} onClick={() => pick(o)} disabled={!!loading} style={{ animationDelay: `${i * 60}ms` }}
