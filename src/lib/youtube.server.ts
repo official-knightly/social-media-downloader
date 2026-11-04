@@ -13,7 +13,7 @@ export function youtubeId(input: string): string | null {
   const v = u.searchParams.get("v");
   if (v) return v;
   const m = u.pathname.match(/^\/(shorts|embed|live|v)\/([\w-]{11})/);
-  return m ? m[2] : null;
+  return m?.[2] ?? null;
 }
 
 type Fmt = { itag: number; url?: string; mimeType: string; height?: number; bitrate?: number; contentLength?: string };
