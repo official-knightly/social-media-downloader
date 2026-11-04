@@ -15,6 +15,15 @@ export const Route = createFileRoute("/api/download")({
   server: { handlers: { POST: async ({ request }) => {
     const data = Input.safeParse(await request.json().catch(() => null));
     if (!data.success) return Response.json({ error: "Invalid download request" }, { status: 400 });
+    const { youtubeId, youtubeStream } = await import("@/lib/youtube.server");
+    const ytId = youtubeId(data.data.url);
+    if (ytId) {
+      try {
+        return await youtubeStream(ytId, data.data.format === "mp3");
+      } catch {
+        // fall through to the hosted downloader
+      }
+    }
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     const key = process.env["DOWNLOADER_API_KEY"];
     if (key) headers["x-api-key"] = key;

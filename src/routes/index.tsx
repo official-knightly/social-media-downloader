@@ -120,7 +120,7 @@ function Index() {
         <section className="brutal bg-accent rounded-lg p-5 mt-6 animate-bounce-in">
           {thumb && <img src={thumb} alt="Video preview" className="brutal rounded-lg w-full mb-4" />}
           <h2 className="font-display text-xl">Pick a resolution</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Available quality depends on the post. Render may need a moment to wake up; large files take longer.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Available quality depends on the post. YouTube downloads run on GrabIt's own downloader (video up to 360p, plus audio). Other sites may need a moment to wake up.</p>
           {loading && <p role="status" className="mt-2 text-sm font-bold">Preparing your {loading} download…</p>}
           <div className="grid grid-cols-3 gap-2 mt-3">
             {OPTIONS.map((o, i) => (
